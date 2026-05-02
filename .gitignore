@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Databases
+*.db
+*.sqlite3
+votesecure.db
+
+# OS Files
+.DS_Store
+Thumbs.db

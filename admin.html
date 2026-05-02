@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VoteSecure – Admin Panel</title>
+  <link rel="stylesheet" href="style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand"><h2>🗳️ Vote<span>Secure</span></h2><p>Admin Control Center</p></div>
+    <nav class="sidebar-nav">
+      <button class="nav-link active" onclick="showView('dashboard')" id="nav-dashboard"><span class="icon">📊</span> Dashboard</button>
+      <button class="nav-link" onclick="showView('elections')" id="nav-elections"><span class="icon">🗳️</span> Elections</button>
+      <button class="nav-link" onclick="showView('candidates')" id="nav-candidates"><span class="icon">👤</span> Candidates</button>
+      <button class="nav-link" onclick="showView('users')" id="nav-users"><span class="icon">👥</span> Voter Management</button>
+      <button class="nav-link" onclick="showView('results')" id="nav-results"><span class="icon">🏆</span> Results</button>
+      <button class="nav-link" onclick="showView('analytics')" id="nav-analytics"><span class="icon">📈</span> Analytics</button>
+      <button class="nav-link" onclick="showView('announcements')" id="nav-announcements"><span class="icon">📢</span> Announcements</button>
+      <button class="nav-link" onclick="showView('anomalies')" id="nav-anomalies"><span class="icon">🛡️</span> AI Anomalies</button>
+      <button class="nav-link" onclick="showView('audit')" id="nav-audit"><span class="icon">📋</span> Audit Logs</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="adminAvatar">A</div>
+        <div><div class="user-name" id="adminName">Admin</div><div class="user-role" id="adminRole"></div></div>
+      </div>
+      <button class="btn-logout" onclick="logout()">⬅ Logout</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-title"><h1 id="viewTitle">Dashboard</h1><p id="viewSub">Election Management Overview</p></div>
+      <div class="topbar-actions">
+        <span id="liveIndicator" style="display:none;color:#10b981;font-size:.78rem;font-weight:600;align-items:center;gap:.3rem">🟢 Live</span>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+      </div>
+    </header>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="view" id="view-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon blue">🗳️</div><div><div class="stat-value" id="d-elections">—</div><div class="stat-label">Total Elections</div></div></div>
+          <div class="stat-card"><div class="stat-icon green">👥</div><div><div class="stat-value" id="d-voters">—</div><div class="stat-label">Registered Voters</div></div></div>
+          <div class="stat-card"><div class="stat-icon orange">📊</div><div><div class="stat-value" id="d-votes">—</div><div class="stat-label">Total Votes Cast</div></div></div>
+          <div class="stat-card"><div class="stat-icon red">🛡️</div><div><div class="stat-value" id="d-anomalies">—</div><div class="stat-label">Anomalies Detected</div></div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">📈 Voter Turnout by Election</div>
+            <div id="turnoutList"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📊 Active Elections Overview</div>
+            <div class="chart-container" style="height:240px"><canvas id="dashChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ELECTIONS -->
+      <div class="view hidden" id="view-elections">
+        <div class="section-header">
+          <div class="section-title">All Elections</div>
+          <button class="btn btn-primary btn-sm" onclick="openElectionModal()">+ Create Election</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table><thead><tr><th>ID</th><th>Title</th><th>Constituency</th><th>Start</th><th>End</th><th>Status</th><th>Votes</th><th>Actions</th></tr></thead>
+            <tbody id="electionsTable"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CANDIDATES -->
+      <div class="view hidden" id="view-candidates">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Candidates</div>
+            <select class="form-control" id="candFilter" onchange="loadCandidates()" style="margin-top:.5rem;max-width:320px">
+              <option value="">— Select Election —</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('candidateModal')">+ Add Candidate</button>
+        </div>
+        <div class="candidate-grid" id="candidateGrid"></div>
+      </div>
+
+      <!-- USERS -->
+      <div class="view hidden" id="view-users">
+        <div class="section-header">
+          <div class="section-title">Registered Voters</div>
+          <input class="form-control" id="userSearch" placeholder="Search by name or email..." style="max-width:260px" oninput="filterUsers()"/>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table><thead><tr><th>Voter ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Constituency</th><th>Aadhaar</th><th>Voter ID</th><th>Registered</th><th>Action</th></tr></thead>
+            <tbody id="usersTable"></tbody></table>
+          </div>
+          <div class="empty-state hidden" id="usersEmpty"><div class="icon">👥</div><h3>No voters found</h3></div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="view hidden" id="view-results">
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card-title">📊 Election Results</div>
+          <div style="display:flex;gap:.75rem;flex-wrap:wrap;align-items:center">
+            <select class="form-control" id="resSelect" onchange="loadResults(this.value)" style="max-width:360px"></select>
+            <button class="btn btn-outline btn-sm" onclick="exportCSV()">⬇ CSV</button>
+            <button class="btn btn-outline btn-sm" onclick="exportPDF()">🖨 PDF</button>
+          </div>
+        </div>
+        <div id="resultsPanel" class="hidden">
+          <div id="winnerCard" style="margin-bottom:1.5rem"></div>
+          <div class="grid-2" style="margin-bottom:1.5rem">
+            <div class="card"><div class="card-title">Bar Chart</div><div class="chart-container" style="height:260px"><canvas id="resBar"></canvas></div></div>
+            <div class="card"><div class="card-title">Pie Chart</div><div class="chart-container" style="height:260px"><canvas id="resPie"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📋 Detailed Breakdown</div>
+            <div class="table-wrap"><table><thead><tr><th>Rank</th><th>Candidate</th><th>Party</th><th>Votes</th><th>%</th><th>Progress</th></tr></thead><tbody id="resTable"></tbody></table></div>
+          </div>
+          <div class="card" style="margin-top:1rem">
+            <div class="card-title">🤖 AI Summary</div>
+            <p id="aiSummary" style="color:var(--text-muted);font-size:.88rem;line-height:1.7;white-space:pre-line"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="view hidden" id="view-analytics">
+        <div class="card" style="margin-bottom:1.5rem">
+          <div class="card-title">📈 Select Election for Analytics</div>
+          <select class="form-control" id="analyticsSelect" onchange="loadAnalytics(this.value)" style="max-width:360px"></select>
+        </div>
+        <div id="analyticsPanel" class="hidden">
+          <div class="grid-2" style="margin-bottom:1.5rem">
+            <div class="card"><div class="card-title">⏰ Hourly Voting Pattern</div><div class="chart-container" style="height:240px"><canvas id="hourlyChart"></canvas></div></div>
+            <div class="card"><div class="card-title">⚧ Gender Breakdown</div><div class="chart-container" style="height:240px"><canvas id="genderChart"></canvas></div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">📍 Votes by Constituency</div>
+            <div id="constList"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ANNOUNCEMENTS -->
+      <div class="view hidden" id="view-announcements">
+        <div class="section-header">
+          <div class="section-title">Announcements</div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('annModal')">+ Post Announcement</button>
+        </div>
+        <div id="annList"></div>
+      </div>
+
+      <!-- ANOMALIES -->
+      <div class="view hidden" id="view-anomalies">
+        <div class="card">
+          <div class="section-header" style="margin-bottom:1rem">
+            <div class="card-title" style="margin-bottom:0">🛡️ AI Anomaly Report</div>
+            <button class="btn btn-outline btn-sm" onclick="loadAnomalies()">🔄 Refresh</button>
+          </div>
+          <p style="color:var(--text-muted);font-size:.83rem;margin-bottom:1rem">AI engine monitors for duplicate votes, brute-force logins, and unusual traffic patterns.</p>
+          <div id="anomalyList"></div>
+        </div>
+      </div>
+
+      <!-- AUDIT LOGS -->
+      <div class="view hidden" id="view-audit">
+        <div class="card">
+          <div class="section-header" style="margin-bottom:1rem">
+            <div class="card-title" style="margin-bottom:0">📋 System Audit Logs</div>
+            <input class="form-control" id="auditSearch" placeholder="Filter..." style="max-width:220px" oninput="filterAudit()"/>
+          </div>
+          <div class="table-wrap">
+            <table><thead><tr><th>ID</th><th>User</th><th>Action</th><th>Details</th><th>Time</th><th>IP</th></tr></thead>
+            <tbody id="auditTable"></tbody></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Election Modal -->
+<div class="modal-overlay hidden" id="electionModal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title" id="elModalTitle">Create Election</div><button class="modal-close" onclick="closeModal('electionModal')">✕</button></div>
+    <input type="hidden" id="editElId"/>
+    <div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="el-title" placeholder="General Assembly Election 2024"/></div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="el-desc" rows="2"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Constituency</label>
+        <select class="form-control" id="el-const"><option>All</option><option>North District</option><option>South Constituency</option><option>East Ward</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-control" id="el-status"><option>upcoming</option><option>active</option><option>ended</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Start *</label><input class="form-control" type="datetime-local" id="el-start"/></div>
+      <div class="form-group"><label class="form-label">End *</label><input class="form-control" type="datetime-local" id="el-end"/></div>
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-outline" onclick="closeModal('electionModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveElection()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Candidate Modal -->
+<div class="modal-overlay hidden" id="candidateModal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title">Add Candidate</div><button class="modal-close" onclick="closeModal('candidateModal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Election *</label><select class="form-control" id="cand-eid"></select></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Name *</label><input class="form-control" id="cand-name"/></div>
+      <div class="form-group"><label class="form-label">Party *</label><input class="form-control" id="cand-party"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Constituency *</label>
+        <select class="form-control" id="cand-const"><option>All</option><option>North District</option><option>South Constituency</option><option>East Ward</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Photo URL</label><input class="form-control" id="cand-photo" placeholder="https://.../photo.jpg"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Manifesto</label><textarea class="form-control" id="cand-manifesto" rows="3" placeholder="Key promises..."></textarea></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-outline" onclick="closeModal('candidateModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveCandidate()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- Announcement Modal -->
+<div class="modal-overlay hidden" id="annModal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title">Post Announcement</div><button class="modal-close" onclick="closeModal('annModal')">✕</button></div>
+    <div class="form-group"><label class="form-label">Title *</label><input class="form-control" id="ann-title" placeholder="Announcement title"/></div>
+    <div class="form-group"><label class="form-label">Message *</label><textarea class="form-control" id="ann-body" rows="4" placeholder="Full announcement text..."></textarea></div>
+    <div class="form-group"><label class="form-label">Priority</label>
+      <select class="form-control" id="ann-priority"><option value="normal">Normal</option><option value="high">🔴 High</option><option value="low">Low</option></select>
+    </div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:.5rem">
+      <button class="btn btn-outline" onclick="closeModal('annModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="postAnnouncement()">Post</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div class="modal-overlay hidden" id="userModal">
+  <div class="modal-box">
+    <div class="modal-header"><div class="modal-title">Voter Details</div><button class="modal-close" onclick="closeModal('userModal')">✕</button></div>
+    <div id="userModalBody"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1rem">
+      <button class="btn btn-outline" onclick="closeModal('userModal')">Close</button>
+      <button class="btn btn-danger" id="deleteUserBtn" onclick="deleteUserConfirm()">🗑️ Delete Voter</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+<script src="admin.js"></script>
+</body>
+</html>

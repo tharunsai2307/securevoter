@@ -1,11 +1,445 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta http-equiv="refresh" content="0; url=/index.html">
-  <script>window.location.href = "/index.html";</script>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VoteSecure – AI Digital Voting Platform</title>
+  <meta name="description" content="VoteSecure: Secure AI-powered digital voting and election management system."/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    body{min-height:100vh;background:linear-gradient(135deg,#0f2347 0%,#1a3a6b 50%,#2255a4 100%);display:flex;align-items:center;justify-content:center;padding:1rem}
+    .auth-wrap{width:100%;max-width:520px}
+    .brand{text-align:center;margin-bottom:1.5rem}
+    .brand h1{color:white;font-size:2.2rem;font-weight:800}.brand h1 span{color:#60a5fa}
+    .brand p{color:rgba(255,255,255,0.6);font-size:.88rem;margin-top:.3rem}
+    .auth-card{background:white;border-radius:16px;padding:2rem;box-shadow:0 25px 60px rgba(0,0,0,0.3)}
+    [data-theme="dark"] .auth-card{background:#1e293b}
+    .tabs{display:flex;background:#f0f4f8;border-radius:10px;padding:4px;margin-bottom:1.5rem;gap:4px}
+    [data-theme="dark"] .tabs{background:#0f172a}
+    .tab{flex:1;padding:.55rem;border:none;background:none;border-radius:8px;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;color:#64748b;transition:all .2s}
+    .tab.active{background:white;color:#1a3a6b;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+    [data-theme="dark"] .tab.active{background:#1e293b;color:#60a5fa}
+    .form-panel{display:none}.form-panel.active{display:block}
+    .form-panel h2{font-size:1.1rem;font-weight:700;margin-bottom:1.1rem}
+    .err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:8px;padding:.6rem .9rem;font-size:.82rem;margin-bottom:.9rem;display:none}
+    .err.show{display:block}
+    .success-box{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:1rem;text-align:center;margin-bottom:1rem;display:none}
+    .success-box.show{display:block}
+    .success-box strong{display:block;font-size:1.4rem;color:#065f46;font-weight:800;margin:.3rem 0}
+    .btn-full{width:100%;justify-content:center;padding:.78rem;font-size:.95rem}
+    .footer-note{text-align:center;color:#94a3b8;font-size:.78rem;margin-top:1rem}
+    .theme-btn{position:fixed;top:1rem;right:1rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.2);color:white;border-radius:20px;padding:.4rem 1rem;font-family:inherit;font-size:.82rem;cursor:pointer}
+    /* Stepper */
+    .stepper{display:flex;align-items:center;margin-bottom:1.5rem;gap:0}
+    .step{display:flex;align-items:center;gap:.4rem;font-size:.78rem;font-weight:600;color:#94a3b8;flex:1}
+    .step.active{color:#1a3a6b}.step.done{color:#10b981}
+    [data-theme="dark"] .step.active{color:#60a5fa}
+    .step-num{width:26px;height:26px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-size:.75rem;flex-shrink:0}
+    .step-line{flex:1;height:2px;background:#e2e8f0;margin:0 .3rem}
+    .step.done .step-num{background:#10b981;border-color:#10b981;color:white}
+    .step.active .step-num{background:#1a3a6b;border-color:#1a3a6b;color:white}
+    [data-theme="dark"] .step.active .step-num{background:#2563eb;border-color:#2563eb}
+    /* OTP box */
+    .otp-row{display:flex;gap:.5rem;align-items:flex-end}
+    .otp-row .form-control{flex:1}
+    .otp-demo{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:.6rem .9rem;font-size:.82rem;margin-top:.5rem;display:none}
+    .otp-demo.show{display:block}
+    .otp-demo strong{color:#92400e;font-size:1.1rem}
+    /* Proof section */
+    .proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .id-badge{border:2px dashed var(--border,#e2e8f0);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all .2s}
+    .id-badge:hover{border-color:#1a3a6b;background:rgba(26,58,107,.04)}
+    .id-badge .ico{font-size:2rem;margin-bottom:.4rem}
+    .id-badge .lbl{font-size:.78rem;font-weight:600;color:var(--text-muted,#64748b)}
+    .const-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.4rem}
+    .const-opt{background:#f0f4f8;border:2px solid #e2e8f0;border-radius:8px;padding:.5rem .75rem;font-size:.82rem;cursor:pointer;transition:all .2s;text-align:center}
+    .const-opt.sel{border-color:#1a3a6b;background:rgba(26,58,107,.1);color:#1a3a6b;font-weight:600}
+    [data-theme="dark"] .const-opt{background:#0f172a;border-color:#334155;color:#e2e8f0}
+    [data-theme="dark"] .const-opt.sel{border-color:#3b82f6;background:rgba(59,130,246,.1);color:#60a5fa}
+    .pw-strength{height:4px;border-radius:99px;margin-top:.4rem;transition:all .3s;background:#e2e8f0}
+    .pw-strength-label{font-size:.72rem;margin-top:.25rem}
+    .admin-link{display:block;text-align:center;margin-top:1rem;color:rgba(255,255,255,.6);font-size:.82rem;text-decoration:none}
+    .admin-link:hover{color:white}
+    /* Animations */
+    @keyframes splashFade {
+      0% { opacity: 1; visibility: visible; }
+      80% { opacity: 1; visibility: visible; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+    @keyframes slideUp {
+      0% { opacity: 0; transform: translateY(30px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .splash-screen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg,#0f2347 0%,#1a3a6b 50%,#2255a4 100%);
+      z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      animation: splashFade 2.5s ease-in-out forwards;
+    }
+    .splash-logo { font-size: 5rem; margin-bottom: 1rem; animation: slideUp 1s ease-out; }
+    .splash-text { color: white; font-size: 2.5rem; font-weight: 800; animation: slideUp 1s ease-out 0.2s both; }
+    .splash-text span { color: #60a5fa; }
+    .auth-wrap { width: 100%; max-width: 520px; animation: slideUp 1s ease-out 2s both; }
+  </style>
 </head>
 <body>
-  <p>If you are not redirected automatically, follow this link to the <a href="/index.html">VoteSecure App</a>.</p>
-  <p><strong>Note:</strong> You must run the Python server first! (`python app.py`)</p>
+<!-- SPLASH SCREEN -->
+<div class="splash-screen">
+  <div class="splash-logo">🗳️</div>
+  <div class="splash-text">Vote<span>Secure</span></div>
+  <div style="color:rgba(255,255,255,0.7); margin-top:0.5rem; animation: slideUp 1s ease-out 0.4s both;">Initializing AI Platform...</div>
+</div>
+
+<button class="theme-btn" onclick="toggleTheme()" id="themeBtn" style="animation: slideUp 1s ease-out 2.5s both;">🌙 Dark</button>
+
+<div class="auth-wrap">
+  <div class="brand">
+    <div style="font-size:3rem">🗳️</div>
+    <h1>Vote<span>Secure</span></h1>
+    <p>AI-Based Digital Voting & Election Management System</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Voter Login</button>
+      <button class="tab" onclick="switchTab('register')">Register</button>
+      <button class="tab" onclick="switchTab('admin')">Admin</button>
+    </div>
+
+    <!-- ── VOTER LOGIN ── -->
+    <div class="form-panel active" id="panel-login">
+      <h2>🗳️ Voter Login</h2>
+      <div class="err" id="vl-err"></div>
+      
+      <!-- Google Sign In -->
+      <button class="btn btn-outline btn-full" style="margin-bottom:1.5rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; font-weight:600; font-size:.95rem" onclick="window.location.href='/api/auth/google'">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="20" alt="Google"> Continue with Google
+      </button>
+      
+      <div style="text-align:center; color:var(--text-muted,#94a3b8); font-size:0.75rem; font-weight:700; letter-spacing:1px; margin-bottom:1.5rem; position:relative;">
+        <hr style="border:none; border-top:1px solid var(--border,#e2e8f0); position:absolute; top:50%; width:100%; z-index:1"/>
+        <span style="background:var(--card-bg, #ffffff); padding:0 10px; position:relative; z-index:2">OR LOGIN WITH EMAIL</span>
+      </div>
+
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-control" type="email" id="vl-email" placeholder="your@email.com"/></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-control" type="password" id="vl-pass" placeholder="••••••••" onkeyup="if(event.key==='Enter')voterLogin()"/></div>
+      <button class="btn btn-primary btn-full" onclick="voterLogin()">Login to Vote →</button>
+      <div class="footer-note">Demo: aditya@example.com / Test@123</div>
+    </div>
+
+    <!-- ── REGISTER (3-step) ── -->
+    <div class="form-panel" id="panel-register">
+      <!-- Stepper -->
+      <div class="stepper">
+        <div class="step active" id="st1"><div class="step-num">1</div><span>Details</span></div>
+        <div class="step-line"></div>
+        <div class="step" id="st2"><div class="step-num">2</div><span>Verify</span></div>
+      </div>
+
+      <div class="err" id="reg-err"></div>
+
+      <!-- Step 1: Personal Details -->
+      <div id="reg-step1">
+        <h2>📝 Personal Details</h2>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Full Name *</label><input class="form-control" id="r-name" placeholder="As per govt ID"/></div>
+          <div class="form-group"><label class="form-label">Date of Birth *</label><input class="form-control" type="date" id="r-dob"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Email *</label><input class="form-control" type="email" id="r-email" placeholder="your@email.com"/></div>
+          <div class="form-group"><label class="form-label">Gender</label>
+            <select class="form-control" id="r-gender"><option>Male</option><option>Female</option><option>Other</option></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password *</label>
+          <input class="form-control" type="password" id="r-pass" placeholder="Min 8 chars" oninput="checkPwStrength(this.value)"/>
+          <div class="pw-strength" id="pw-bar"></div>
+          <div class="pw-strength-label" id="pw-label"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Constituency *</label>
+          <input type="hidden" id="r-const" value="All"/>
+          <div class="const-grid">
+            <div class="const-opt sel" onclick="selConst(this,'All')">🌐 All (National)</div>
+            <div class="const-opt" onclick="selConst(this,'North District')">🏙️ North District</div>
+            <div class="const-opt" onclick="selConst(this,'South Constituency')">🏘️ South Constituency</div>
+            <div class="const-opt" onclick="selConst(this,'East Ward')">🌄 East Ward</div>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-full" onclick="goStep2()">Next: Phone Verification →</button>
+      </div>
+
+      <!-- Step 2: CAPTCHA + Phone -->
+      <div id="reg-step2" style="display:none">
+        <h2>🤖 Verify You're Human</h2>
+        <p style="color:var(--text-muted,#64748b);font-size:.85rem;margin-bottom:1rem">Solve the CAPTCHA to continue. Your phone number is stored for contact purposes.</p>
+
+        <!-- CAPTCHA box -->
+        <div style="background:var(--bg,#f0f4f8);border:2px solid var(--border,#e2e8f0);border-radius:12px;padding:1.25rem;text-align:center;margin-bottom:1rem">
+          <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted,#64748b);margin-bottom:.5rem">Security CAPTCHA</div>
+          <div id="captcha-question" style="font-size:1.6rem;font-weight:800;color:#1a3a6b;margin-bottom:.75rem">—</div>
+          <div style="display:flex;gap:.5rem;justify-content:center;align-items:center">
+            <input class="form-control" type="number" id="captcha-answer" placeholder="Your answer" style="max-width:140px;text-align:center;font-size:1.1rem;font-weight:700"/>
+            <button class="btn btn-primary" onclick="verifyCaptcha()">Verify ✓</button>
+            <button class="btn btn-outline" onclick="loadCaptcha()" title="New question">🔄</button>
+          </div>
+          <div id="captcha-ok" style="color:#10b981;font-weight:700;margin-top:.6rem;display:none">✅ CAPTCHA passed — you're human!</div>
+          <input type="hidden" id="captcha-token"/>
+        </div>
+
+        <!-- Phone (optional, stored) -->
+        <div class="form-group">
+          <label class="form-label">Mobile Number <span style="color:#94a3b8;font-weight:400">(optional, 🇮🇳 +91)</span></label>
+          <div style="display:flex;gap:.5rem;align-items:center">
+            <span style="background:var(--bg,#f0f4f8);border:1px solid var(--border,#e2e8f0);border-radius:8px;padding:.65rem .75rem;font-size:.9rem;white-space:nowrap">+91</span>
+            <input class="form-control" type="tel" id="r-phone" placeholder="9876543210" maxlength="10"/>
+          </div>
+          <small style="color:#94a3b8;font-size:.72rem">Stored for contact. SMS OTP available in production via Twilio/MSG91.</small>
+        </div>
+
+        <div class="form-group" style="margin-top:1rem">
+          <label class="form-label">Security CAPTCHA</label>
+          <div style="display:flex;gap:.5rem;align-items:center;background:rgba(255,255,255,.05);padding:.75rem;border-radius:8px;margin-bottom:.5rem">
+            <span id="captcha-text" style="font-size:1.2rem;font-weight:800;color:var(--accent);letter-spacing:3px">Loading...</span>
+            <button class="btn btn-outline btn-sm" onclick="loadCaptcha()" type="button" style="margin-left:auto">🔄</button>
+          </div>
+          <input class="form-control" id="r-captcha" placeholder="Enter answer"/>
+          <input type="hidden" id="captcha-token"/>
+        </div>
+
+        <div class="success-box" id="reg-success">
+          ✅ Registration Successful!<br>Your Voter ID:
+          <strong id="new-voter-id">—</strong>
+          <small style="display:block;color:#065f46;margin-top:.3rem">Save this ID for reference</small>
+        </div>
+
+        <div style="display:flex;gap:.75rem;margin-top:1rem">
+          <button class="btn btn-outline" onclick="goBackStep1()">← Back</button>
+          <button class="btn btn-primary" style="flex:1" onclick="submitRegister()" id="step3Btn">✅ Complete Registration</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ADMIN LOGIN ── -->
+    <div class="form-panel" id="panel-admin">
+      <h2>🔐 Admin Login</h2>
+      <div class="err" id="al-err"></div>
+      <div class="form-group"><label class="form-label">Admin Email</label><input class="form-control" type="email" id="al-email" placeholder="admin@votesecure.com"/></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-control" type="password" id="al-pass" placeholder="••••••••" onkeyup="if(event.key==='Enter')adminLogin()"/></div>
+      <button class="btn btn-primary btn-full" onclick="adminLogin()">Access Admin Panel →</button>
+      <div class="footer-note">Super Admin: admin@votesecure.com / Admin@123<br/>Officer: officer@votesecure.com / Officer@123</div>
+    </div>
+  </div>
+
+  <a href="#" class="admin-link" onclick="switchTab('admin')">Admin / Election Officer Access →</a>
+
+  <div style="margin-top: 2.5rem; text-align: center; color: rgba(255, 255, 255, 0.7); font-size: 0.85rem; animation: slideUp 1s ease-out 2.2s both;">
+    <div style="margin-bottom: 0.5rem; letter-spacing: 1px; text-transform: uppercase; font-size: 0.72rem; font-weight: 600;">Developed & Designed by</div>
+    <div style="color: white; font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px;">Tharun Sai</div>
+    <div style="margin-top: 0.8rem; display: flex; justify-content: center; gap: 1.5rem;">
+      <a href="https://www.linkedin.com/in/tharun-sai-gangadhar-p-a32245396" id="link-linkedin" target="_blank" style="color: #60a5fa; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.3rem;">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        LinkedIn
+      </a>
+      <a href="https://www.instagram.com/delulu_daydreamer" id="link-instagram" target="_blank" style="color: #ec4899; text-decoration: none; font-weight: 600; font-size: 0.85rem; transition: all 0.2s; display: flex; align-items: center; gap: 0.3rem;">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        Instagram
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+const API='/api';
+let phoneVerified=false;
+
+window.addEventListener('DOMContentLoaded', () => {
+  loadCaptcha();
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('error')) {
+    showErr('vl-err', decodeURIComponent(params.get('error')));
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+});
+
+// Theme
+function toggleTheme(){
+  const d=document.documentElement;
+  const dark=d.getAttribute('data-theme')==='dark';
+  d.setAttribute('data-theme',dark?'':'dark');
+  document.getElementById('themeBtn').textContent=dark?'🌙 Dark':'☀️ Light';
+}
+
+// Tabs
+function switchTab(t){
+  document.querySelectorAll('.form-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  document.querySelectorAll('.tab')[['login','register','admin'].indexOf(t)].classList.add('active');
+}
+
+// Error
+function showErr(id,msg){const e=document.getElementById(id);e.textContent=msg;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),5000);}
+
+// Constituency
+function selConst(el,val){
+  document.querySelectorAll('.const-opt').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');document.getElementById('r-const').value=val;
+}
+
+// Focus helper
+function focusField(id){document.getElementById(id).focus();}
+
+// Aadhaar formatter
+function fmtAadhaar(el){el.value=el.value.replace(/\D/g,'').substring(0,12);}
+
+// Password strength
+function checkPwStrength(pw){
+  const bar=document.getElementById('pw-bar');
+  const lbl=document.getElementById('pw-label');
+  let score=0;
+  if(pw.length>=8)score++;if(/[A-Z]/.test(pw))score++;
+  if(/[0-9]/.test(pw))score++;if(/[^A-Za-z0-9]/.test(pw))score++;
+  const colors=['#ef4444','#f59e0b','#3b82f6','#10b981'];
+  const labels=['Weak','Fair','Good','Strong'];
+  bar.style.background=score>0?colors[score-1]:'#e2e8f0';
+  bar.style.width=(score*25)+'%';
+  lbl.textContent=score>0?labels[score-1]:'';
+  lbl.style.color=score>0?colors[score-1]:'';
+}
+
+// Step 2 — load CAPTCHA from server
+async function loadCaptcha() {
+  try {
+    const res = await fetch(`${API}/auth/captcha`);
+    const data = await res.json();
+    document.getElementById('captcha-text').textContent = data.text;
+    document.getElementById('captcha-token').value = data.token;
+  } catch(e) {}
+}
+function goStep2(){
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const dob=document.getElementById('r-dob').value;
+  const pass=document.getElementById('r-pass').value;
+  if(!name||!email||!dob||!pass)return showErr('reg-err','Please fill all required fields.');
+  if(pass.length<6)return showErr('reg-err','Password must be at least 6 characters.');
+  document.getElementById('reg-step1').style.display='none';
+  document.getElementById('reg-step2').style.display='block';
+  setStep(2);
+  loadCaptcha();
+}
+function goBackStep1(){
+  document.getElementById('reg-step2').style.display='none';
+  document.getElementById('reg-step1').style.display='block';
+  setStep(1);
+}
+function setStep(n){
+  for(let i=1;i<=2;i++){
+    const el=document.getElementById('st'+i);
+    el.classList.remove('active','done');
+    if(i<n)el.classList.add('done');
+    else if(i===n)el.classList.add('active');
+  }
+}
+
+// CAPTCHA
+async function loadCaptcha() {
+  try {
+    const res = await fetch(`${API}/auth/captcha`);
+    const data = await res.json();
+    document.getElementById('captcha-text').textContent = data.text;
+    document.getElementById('captcha-token').value = data.token;
+  } catch(e) {}
+}
+
+// Register submit
+async function submitRegister(){
+  const payload={
+    name:document.getElementById('r-name').value.trim(),
+    email:document.getElementById('r-email').value.trim(),
+    dob:document.getElementById('r-dob').value,
+    gender:document.getElementById('r-gender').value,
+    password:document.getElementById('r-pass').value,
+    constituency:document.getElementById('r-const').value,
+    phone:document.getElementById('r-phone').value.trim(),
+    captcha_token: document.getElementById('captcha-token').value,
+    captcha_answer: document.getElementById('r-captcha').value.trim(),
+    aadhaar_id: "",
+    govt_voter_id: ""
+  };
+  
+  if(!payload.captcha_answer) return showErr('reg-err','Please solve the CAPTCHA.');
+
+  try{
+    const res=await fetch(`${API}/auth/register`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(!res.ok)return showErr('reg-err',data.error);
+    document.getElementById('new-voter-id').textContent=data.voter_id;
+    document.getElementById('reg-success').classList.add('show');
+    
+    // Automatically log the user in and redirect to dashboard
+    setTimeout(async () => {
+      try {
+        const loginRes = await fetch(`${API}/auth/voter/login`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ email: payload.email, password: payload.password })
+        });
+        const loginData = await loginRes.json();
+        if(loginRes.ok) {
+          localStorage.setItem('vs_token', loginData.token);
+          localStorage.setItem('vs_role', 'voter');
+          localStorage.setItem('vs_name', loginData.name);
+          localStorage.setItem('vs_constituency', loginData.constituency);
+          window.location.href = 'voter.html';
+        } else {
+          switchTab('login');
+        }
+      } catch(e) {
+        switchTab('login');
+      }
+    }, 2500);
+  }catch(e){showErr('reg-err','Cannot connect to server.');}
+}
+
+// Voter login
+async function voterLogin(){
+  const email=document.getElementById('vl-email').value;
+  const password=document.getElementById('vl-pass').value;
+  if(!email||!password)return showErr('vl-err','Please fill all fields.');
+  try{
+    const res=await fetch(`${API}/auth/voter/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const data=await res.json();
+    if(!res.ok)return showErr('vl-err',data.error);
+    localStorage.setItem('vs_token',data.token);
+    localStorage.setItem('vs_role','voter');
+    localStorage.setItem('vs_name',data.name);
+    localStorage.setItem('vs_constituency',data.constituency);
+    window.location.href='voter.html';
+  }catch(e){showErr('vl-err','Cannot connect to server. Make sure python app.py is running.');}
+}
+
+// Admin login
+async function adminLogin(){
+  const email=document.getElementById('al-email').value;
+  const password=document.getElementById('al-pass').value;
+  if(!email||!password)return showErr('al-err','Please fill all fields.');
+  try{
+    const res=await fetch(`${API}/auth/admin/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const data=await res.json();
+    if(!res.ok)return showErr('al-err',data.error);
+    localStorage.setItem('vs_token',data.token);
+    localStorage.setItem('vs_role',data.role);
+    localStorage.setItem('vs_name',data.name);
+    window.location.href='admin.html';
+  }catch(e){showErr('al-err','Cannot connect to server.');}
+}
+
+// Redirect if logged in
+const tok=localStorage.getItem('vs_token'),role=localStorage.getItem('vs_role');
+if(tok&&role==='voter')window.location.href='voter.html';
+if(tok&&(role==='super_admin'||role==='election_officer'))window.location.href='admin.html';
+</script>
 </body>
 </html>

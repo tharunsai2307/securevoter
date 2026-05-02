@@ -4,20 +4,13 @@ echo   Starting VoteSecure Server...
 echo =========================================
 echo.
 echo 1) Checking for required packages...
-pip install -r public\requirements.txt >nul 2>&1
+pip install -r requirements.txt
 echo.
 echo 2) Opening Google Chrome automatically...
 start chrome "http://127.0.0.1:8000"
 echo.
-echo 3) Starting the server...
-echo.
-python public\app.py > server_error.log 2>&1
-if %errorlevel% neq 0 (
-    py public\app.py >> server_error.log 2>&1
-)
-if %errorlevel% neq 0 (
-    python3 public\app.py >> server_error.log 2>&1
-)
+echo 3) Starting the server (DO NOT CLOSE THIS BLACK WINDOW!)
+python app.py
 echo.
 echo =========================================
 echo   SERVER STOPPED OR CRASHED!
