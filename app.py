@@ -1381,7 +1381,7 @@ def main():
     init_db()
     print("  Log: App initialized successfully (Multi-Threaded).")
     sys.stdout.flush()
-    HOST, PORT = "0.0.0.0", 8000
+    HOST, PORT = "0.0.0.0", int(os.environ.get("PORT", 8000))
     server = ThreadingHTTPServer((HOST, PORT), VoteSecureHandler)
     print(f"  Server: http://{HOST}:{PORT}")
     print(f"  Admin:  admin@votesecure.com / Admin@123")
